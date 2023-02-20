@@ -1,0 +1,45 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<contacts>
+	<personne id ="1">
+		<firstname>Camilo</firstname>
+		<lastname>Mora</lastname>
+		<phone>12345678</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="2">
+		<firstname>Juanita</firstname>
+		<lastname>Perez</lastname>
+		<phone>11223344</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="3">
+		<firstname>Pepe</firstname>
+		<lastname>Lopez</lastname>
+		<phone>11112222</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="4">
+		<firstname>Ana</firstname>
+		<lastname>Solano</lastname>
+		<phone>44332211</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="5">
+		<firstname>Ricardo</firstname>
+		<lastname>Martinez</lastname>
+		<phone>88776611</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="6">
+		<firstname>Camila</firstname>
+		<lastname>Rodriguez</lastname>
+		<phone>55667788</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+	<personne id ="7">
+		<firstname>Juanito</firstname>
+		<lastname>Uva</lastname>
+		<phone>66557788</phone>
+		<email>pruebacorreosprogramacion1@gmail.com</email>
+	</personne>
+</contacts>
