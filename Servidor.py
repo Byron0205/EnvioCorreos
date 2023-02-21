@@ -3,7 +3,8 @@ from email.message import EmailMessage
 import smtplib
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
-#import threading
+from traceback import format_exc
+import threading
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 5000 # Puerto de comunicacion
@@ -11,11 +12,11 @@ sock.bind(('localhost',port)) # IP y Puerto de conexion en una Tupla
 sock.listen(4)
 ListaPersonas = []
 contador = 0
-contadorprocesados = 0
 Limite = 0
+inicio = False
 
-def EscribirEmail(Lista):
-    remitente = "pruebacorreosprogramacion1@gmail.com"
+def EscribirEmail(Lista,Datos):
+    remitente = Datos[0]
     destinatario = Lista[4]
     mensaje = "Esto es un mensaje desde python"
     email = EmailMessage()
@@ -24,22 +25,34 @@ def EscribirEmail(Lista):
     email["Subject"] = "Correo de prueba python"
     email.set_content(mensaje)
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-    smtp.login(remitente, "") #Falta clave
+    smtp.login(remitente, Datos[1]) #Falta clave
     smtp.sendmail(remitente, destinatario, email.as_string())
     smtp.quit()
 
 def RecibirDatos(con):
+    contadorprocesados = 0
     while True:
-        data = con.recv(4096)
-        dt = data.decode()
-        ListaPersonas.append(dt)
-        contador += 1
-        if contador == 5: #Cada cinco datos es una persona
-            EscribirEmail(ListaPersonas)
-            contadorprocesados += 1
-            contador = 0
-            ListaPersonas = [] # Falta forma de saber cuando terminar el while
-    EscribirXML(registros,contadorprocesados,errores)
+        try:
+            data = con.recv(4096)
+            dt = data.decode()
+            if not inicio:
+                DatosInicio = dt.split(",") #El primer envio de datos es el usuario, clave y cantidad de personas
+                inicio = True
+            else:
+                ListaPersonas.append(dt)
+                contador += 1
+                if contador == 5: #Cada cinco datos es una persona
+                    EnviarEmail = threading.Thread(target=EscribirEmail, name='Enviar Email', args=(ListaPersonas,DatosInicio))
+                    EnviarEmail.start()
+                    #EscribirEmail(ListaPersonas,DatosInicio)
+                    contadorprocesados += 1
+                    contador = 0
+                    ListaPersonas = [] # Falta forma de saber cuando terminar el while
+                if DatosInicio[3] == contadorprocesados:
+                    break
+        except:
+            errores = format_exc()+"\n"
+    EscribirXML(DatosInicio[3],contadorprocesados,errores)
     con.close()
     sock.close()
 
