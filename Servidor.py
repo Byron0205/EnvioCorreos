@@ -3,13 +3,15 @@ from email.message import EmailMessage
 import smtplib
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
-#import threading
+from traceback import format_exc
+import threading
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 5000 # Puerto de comunicacion
 sock.bind(('localhost',port)) # IP y Puerto de conexion en una Tupla
 sock.listen(3)
 Limite = 0
+inicio = False
 
 def EscribirEmail(email, mensaje, asunto):
     remitente = "pruebacorreosprogramacion1@gmail.com"
@@ -21,7 +23,7 @@ def EscribirEmail(email, mensaje, asunto):
     email["Subject"] = asunto
     email.set_content(mensaje)
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-    smtp.login(remitente, "") #Falta clave
+    smtp.login(remitente, '') #Falta clave
     smtp.sendmail(remitente, destinatario, email.as_string())
     smtp.quit()
 
