@@ -43,7 +43,9 @@ def RecibirDatos(con):
                 if datosEnviados[0] == '1':
                     datosEnviados.remove('1')
                     for p in datosEnviados:
-                        EscribirEmail(p,mensaje,asunto)
+                        hilo1= threading.Thread(target=EscribirEmail, args=(p,mensaje,asunto,))
+                        hilo1.start()
+                        hilo1.join()
                         contador+=1
                         contadorprocesados += 1
                 elif datosEnviados[0] == '2':
