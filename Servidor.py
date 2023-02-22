@@ -69,7 +69,7 @@ def RecibirDatos(con):
     con.close()
     sock.close()
 
-def EscribirXML(Registros,Registrosprocesados,Errores):
+def EscribirXML(Registros,Registrosprocesados,errores):
     root = ET.Element("Estadísticas")
 
     g1 = ET.SubElement(root,"General")

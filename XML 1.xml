@@ -30,16 +30,4 @@
 		<phone>88776611</phone>
 		<email>pruebacorreosprogramacion1@gmail.com</email>
 	</personne>
-	<personne id ="6">
-		<firstname>Camila</firstname>
-		<lastname>Bianchi</lastname>
-		<phone>55667788</phone>
-		<email>pruebacorreosprogramacion1@gmail.com</email>
-	</personne>
-	<personne id ="7">
-		<firstname>Camilo</firstname>
-		<lastname>Uva</lastname>
-		<phone>66557788</phone>
-		<email>pruebacorreosprogramacion1@gmail.com</email>
-	</personne>
 </contacts>

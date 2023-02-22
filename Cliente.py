@@ -14,6 +14,8 @@ class GUI(tk.Tk):
         self.clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.correo = ''
         self.password = ''
+        self.completados = tk.IntVar(value=0)
+        self.total = tk.IntVar()
         self.rutas =[None,None,None]
         self.clientes = []
         self.hilo1= threading.Thread(target=self.GuardarClientes, args=(self.rutas[0],))
@@ -24,7 +26,7 @@ class GUI(tk.Tk):
         self.boton_CargarClientes = ''
         #self.boton_Consultar = ''
 
-        self.componentes()
+        
 
 
     def componentes(self):
@@ -46,6 +48,24 @@ class GUI(tk.Tk):
         mensaje_text.grid(row=2, column=1, rowspan=3)
         enviar_button.grid(row=5, column=1, sticky=tk.E)
 
+    def VentanaProgreso(self):
+        self.total.set(len(self.clientes))
+        ventana = tk.Toplevel(self)
+        ventana.grab_set()
+        lblCompletados = tk.Label(ventana, textvariable=self.completados)
+        lblCompletados.grid(row=1, column=1)
+        lblUnion= tk.Label(ventana, text=' de ')
+        lblUnion.grid(row=1, column=2)
+        lblRestante = tk.Label(ventana, textvariable=self.total)
+        lblRestante.grid(row=1, column=3)
+        while self.completados.get() < self.total.get(): #Esto recibe lo que envia el server, no se como mostrarlo o si deberia estar aqui xd
+            data = self.clientSocket.recv(4096)
+            dt = data.decode()
+            self.completados.set(int(dt))
+        else:
+            alert.showinfo(title='transaccion exitosa', message='Completado el envio!!')
+            #ventana.destroy()
+        ventana.mainloop()
 
     def enviarCorreo(self, mensaje, asunto):
         self.clientSocket.connect(('localhost', 5000))
@@ -59,10 +79,7 @@ class GUI(tk.Tk):
             enviado = datos.encode()
             self.clientSocket.send(enviado)
         self.clientSocket.send(b'3')
-        while True: #Esto recibe lo que envia el server, no se como mostrarlo o si deberia estar aqui xd
-            data = self.clientSocket.recv(4096)
-            dt = data.decode()
-            print(dt)
+        self.VentanaProgreso()
 
     def CargarClientesXML(self):
         if len(self.rutas)>=3:
@@ -117,7 +134,6 @@ class GUI(tk.Tk):
         boton_Aceptar.grid(row=5,column=1)
         if self.ruta.get() == "":
             self.boton_CargarClientes.config(state='disabled')
-            self.boton_Consultar.config(state='disabled')
 
     def buscar_archivos(self):
         self.rutas.clear()
@@ -138,6 +154,7 @@ class GUI(tk.Tk):
                 
 
             self.boton_CargarClientes.config(state='normal')
+            alert.showinfo(title='Transaccion exitosa', message='Clientes cargados correctamente')
         else:
             alert.showwarning(title='Error en la carga de archivos',text="Debe seleccionar entre 2 y 3 archivos")
     
@@ -147,7 +164,7 @@ class GUI(tk.Tk):
         ventana.withdraw
 
     def IniciarSesion(self):
-        ventana = tk.Tk()
+        ventana = tk.Toplevel(self)
         ventana.title("Inicio de sesión")
         ventana.geometry("500x250")
 
@@ -166,9 +183,13 @@ class GUI(tk.Tk):
 
         iniciar_sesion_button = tk.Button(ventana, text="Iniciar sesión",command=lambda:self.guardarCredenciales(correo_entry.get(),contrasena_entry.get(),ventana))
         iniciar_sesion_button.pack(pady=20)
-
         # centrar la ventana en la pantalla
-        ventana.eval('tk::PlaceWindow %s center' % ventana.winfo_toplevel())
+        #ventana.update_idletasks()
+        #width = ventana.winfo_width()
+        #height = ventana.winfo_height()
+        #x = (ventana.winfo_screenwidth() // 2) - (width // 2)
+        #y = (ventana.winfo_screenheight() // 2) - (height // 2)
+        #ventana.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
         ventana.mainloop()
 
