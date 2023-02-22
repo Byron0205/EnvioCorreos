@@ -13,6 +13,8 @@ sock.listen(3)
 Limite = 0
 inicio = False
 
+# PruebaLola1234
+
 def EscribirEmail(email, mensaje, asunto):
     remitente = "pruebacorreosprogramacion1@gmail.com"
     mensaje = mensaje
@@ -33,26 +35,29 @@ def RecibirDatos(con):
     asunto = ''
     mensaje = ''
     while True:
-        data = con.recv(4096)
-        dt = data.decode()
-        datosEnviados=dt.split(',')
-        while True:
-            if datosEnviados[0] == '1':
-                datosEnviados.remove('1')
-                for p in datosEnviados:
-                    EscribirEmail(p,mensaje,asunto)
-                    contador+=1
-                    contadorprocesados += 1
-            elif datosEnviados[0] == '2':
-                mensaje = datosEnviados[1]
-                asunto = datosEnviados[2]
-                datosEnviados.remove('2')
-                datosEnviados.remove(mensaje)
-                datosEnviados.remove(asunto)
-            elif datosEnviados[0] == '3':
-                break
-            #EscribirXML(registros,contadorprocesados,errores)
-        break
+        try:
+            data = con.recv(4096)
+            dt = data.decode()
+            datosEnviados=dt.split(',')
+            while True:
+                if datosEnviados[0] == '1':
+                    datosEnviados.remove('1')
+                    for p in datosEnviados:
+                        EscribirEmail(p,mensaje,asunto)
+                        contador+=1
+                        contadorprocesados += 1
+                elif datosEnviados[0] == '2':
+                    mensaje = datosEnviados[1]
+                    asunto = datosEnviados[2]
+                    datosEnviados.remove('2')
+                    datosEnviados.remove(mensaje)
+                    datosEnviados.remove(asunto)
+                elif datosEnviados[0] == '3':
+                    break
+            break
+        except:
+            errores = format_exc()+"\n"
+    EscribirXML(str(len(datosEnviados)),str(contadorprocesados), errores)
     con.close()
     sock.close()
 

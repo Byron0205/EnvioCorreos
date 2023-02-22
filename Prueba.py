@@ -4,10 +4,9 @@ def VentanaCorreoUnico():
     ventana = tk.Tk()
     ventana.title("Correo nuevo")
 
-    ventana.geometry("520x250")
+    ventana.geometry("500x250")
     correoPara = tk.Label(ventana, text="Para:")
     correoPara_Entry = tk.Entry(ventana, width=50)
-    cargarDestinatarios= tk.Button(ventana, text= 'Cargar', width=6)
     asunto_label = tk.Label(ventana, text="Asunto:")
     asunto_entry = tk.Entry(ventana, width=50)
     mensaje_label = tk.Label(ventana, text="Mensaje:")
@@ -16,7 +15,6 @@ def VentanaCorreoUnico():
 
     correoPara.grid(row=0, column=0, sticky=tk.E)
     correoPara_Entry.grid(row=0, column=1)
-    cargarDestinatarios.grid(row=0,column=2)
     asunto_label.grid(row=1, column=0, sticky=tk.E)
     asunto_entry.grid(row=1, column=1)
     mensaje_label.grid(row=2, column=0, sticky=tk.NE)
@@ -25,7 +23,6 @@ def VentanaCorreoUnico():
 
     ventana.mainloop()
 
-VentanaCorreoUnico()
 
 def IniciarSesion():
     ventana = tk.Tk()
@@ -52,3 +49,5 @@ def IniciarSesion():
     ventana.eval('tk::PlaceWindow %s center' % ventana.winfo_toplevel())
 
     ventana.mainloop()
+
+IniciarSesion()

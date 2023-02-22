@@ -58,9 +58,7 @@ class GUI(tk.Tk):
             datos = f'{c.email},'
             enviado = datos.encode()
             self.clientSocket.send(enviado)
-        datos = '3'
-        enviado = datos.encode()
-        self.clientSocket.send(enviado)
+        self.clientSocket.send(b'3')
 
     def CargarClientesXML(self):
         if len(self.rutas)>=3:
@@ -70,13 +68,11 @@ class GUI(tk.Tk):
             self.hilo1.join()
             self.hilo2.join()
             self.hilo3.join()
-            #self.boton_Consultar.config(state='normal')
         elif len(self.rutas)>=2:
             self.hilo1.start()
             self.hilo2.start()
             self.hilo1.join()
             self.hilo2.join()
-            #self.boton_Consultar.config(state='normal')
 
     def GuardarClientes(self,ruta):
         tree = ET.parse(ruta)
@@ -146,27 +142,6 @@ class GUI(tk.Tk):
         self.password = password
         ventana.withdraw
 
-
-    #Funcion para revisar que existan y se creen los clientes
-    #   formConsultar = tk.Toplevel(self)
-    #    formConsultar.title("Búsqueda")
-
-    #    lblBuscar = tk.Label(formConsultar, text='Digite el nombre o apellido',justify='center')
-    #    lblBuscar.grid(column=1,row=0)
-
-
-        #lista de pacientes
-    #   pacientes = tk.Listbox(formConsultar,justify='center')
-    #    pacientes.grid(row=2,column=1)
-    #    if pacientes.size() ==0:
-    #        for p in self.clientes:
-    #            pacientes.insert('end',  p.id+" "+p.email)
-    #    else:
-    #        pacientes.delete(0, 'END')
-
-    #    formConsultar.mainloop()
-
-
     def IniciarSesion(self):
         ventana = tk.Tk()
         ventana.title("Inicio de sesión")
@@ -192,6 +167,26 @@ class GUI(tk.Tk):
         ventana.eval('tk::PlaceWindow %s center' % ventana.winfo_toplevel())
 
         ventana.mainloop()
+
+    #Funcion para revisar que existan y se creen los clientes
+    #def ConsultarClientes(self):
+    #   formConsultar = tk.Toplevel(self)
+    #    formConsultar.title("Búsqueda")
+
+    #    lblBuscar = tk.Label(formConsultar, text='Digite el nombre o apellido',justify='center')
+    #    lblBuscar.grid(column=1,row=0)
+
+
+        #lista de pacientes
+    #    pacientes = tk.Listbox(formConsultar,justify='center')
+    #    pacientes.grid(row=2,column=1)
+
+    #    for p in self.clientes:
+    #        pacientes.insert('end',  p.id+" "+p.nombre +" "+p.apellido)
+            
+
+    #    formConsultar.mainloop()
+
 
 
 root = GUI()
