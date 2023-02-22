@@ -16,7 +16,7 @@ inicio = False
 # PruebaLola1234
 
 def EscribirEmail(email, mensaje, asunto):
-    remitente = "pruebacorreosprogramacion1@gmail.com"
+    remitente = "jbarquero201420@gmail.com"
     mensaje = mensaje
     destinatario = email
     email = EmailMessage()
@@ -25,13 +25,13 @@ def EscribirEmail(email, mensaje, asunto):
     email["Subject"] = asunto
     email.set_content(mensaje)
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-    smtp.login(remitente, '') #Falta clave
+    smtp.login(remitente, 'kghjhmsvsthnxems') #Falta clave
     smtp.sendmail(remitente, destinatario, email.as_string())
     smtp.quit()
 
 def RecibirDatos(con):
+    errores = ''
     contadorprocesados = 0
-    contador = 1
     asunto = ''
     mensaje = ''
     while True:
@@ -43,23 +43,24 @@ def RecibirDatos(con):
                 if datosEnviados[0] == '1':
                     datosEnviados.remove('1')
                     for p in datosEnviados:
+                        if p == '3':
+                            break
                         hilo1= threading.Thread(target=EscribirEmail, args=(p,mensaje,asunto,))
                         hilo1.start()
-                        hilo1.join()
-                        contador+=1
                         contadorprocesados += 1
+                    hilo1.join()
                 elif datosEnviados[0] == '2':
                     mensaje = datosEnviados[1]
                     asunto = datosEnviados[2]
                     datosEnviados.remove('2')
                     datosEnviados.remove(mensaje)
                     datosEnviados.remove(asunto)
-                elif datosEnviados[0] == '3':
+                elif datosEnviados[-1] == '3':
                     break
             break
         except:
             errores = format_exc()+"\n"
-    EscribirXML(str(len(datosEnviados)),str(contadorprocesados), errores)
+    EscribirXML(str(len(datosEnviados)-1),str(contadorprocesados), errores)
     con.close()
     sock.close()
 
