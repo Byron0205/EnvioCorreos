@@ -3,40 +3,43 @@ from email.message import EmailMessage
 import smtplib
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
-from traceback import format_exc
+#from traceback import format_exc
 import threading
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 5000 # Puerto de comunicacion
 sock.bind(('localhost',port)) # IP y Puerto de conexion en una Tupla
 sock.listen(3)
-Limite = 0
-inicio = False
+errores = []
+
 
 # PruebaLola1234
 
 def EscribirEmail(email, mensaje, asunto):
-    remitente = "jbarquero201420@gmail.com"
-    mensaje = mensaje
-    destinatario = email
-    email = EmailMessage()
-    email["From"] = remitente
-    email["To"] = email
-    email["Subject"] = asunto
-    email.set_content(mensaje)
-    smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-    smtp.login(remitente, 'kghjhmsvsthnxems') #Falta clave
-    smtp.sendmail(remitente, destinatario, email.as_string())
-    smtp.quit()
+    try:
+        remitente = "jbarquero201420@gmail.com"
+        mensaje = mensaje
+        destinatario = email
+        email = EmailMessage()
+        email["From"] = remitente
+        email["To"] = email
+        email["Subject"] = asunto
+        email.set_content(mensaje)
+        smtp = smtplib.SMTP_SSL("smtp.gmail.com")
+        smtp.login(remitente, 'kghjhmsvsthnxems') #Falta clave
+        smtp.sendmail(remitente, destinatario, email.as_string())
+        smtp.quit()
+    except:
+        Error = f'Error al enviar email al correo: {destinatario}\n'
+        errores.append(Error)
 
-def RecibirDatos(con,direc):
-    errores = ''
+def RecibirDatos(con):
     contadorprocesados = 0
     asunto = ''
     mensaje = ''
     while True:
         try:
-            data = con.recv(4096)
+            data = con.recv(4096)  #Tiene limite de 4096 bytes, tal vez ocupe más
             dt = data.decode()
             datosEnviados=dt.split(',')
             while True:
@@ -61,7 +64,7 @@ def RecibirDatos(con,direc):
                     break
             break
         except:
-            errores = format_exc()+"\n"
+            print('Error enviado los datos')
     EscribirXML(str(len(datosEnviados)-1),str(contadorprocesados), errores)
     con.close()
     sock.close()
@@ -74,8 +77,10 @@ def EscribirXML(Registros,Registrosprocesados,Errores):
     r1.text = Registros
     p1 = ET.SubElement(g1, "TotalDeRegistrosProcesados")
     p1.text = Registrosprocesados
-    e1 = ET.SubElement(g1, "Errores")
-    e1.text = Errores
+    es1 = ET.SubElement(g1, "Errores")
+    for e in errores:
+        e1 = ET.SubElement(es1, "Error")
+        e1.text = e
 
         
     tree = ET.ElementTree(root)
@@ -88,7 +93,7 @@ def EscribirXML(Registros,Registrosprocesados,Errores):
 
 #Forma con una sola conexion
 con, client_addr =  sock.accept()
-RecibirDatos(con,client_addr)
+RecibirDatos(con)
 #Forma con varias conexiones
 #while True: 
     # creamos los hilos
