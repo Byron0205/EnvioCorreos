@@ -67,9 +67,9 @@ def EscribirXML(Registros,Registrosprocesados,Errores):
     root = ET.Element("Estadísticas")
 
     g1 = ET.SubElement(root,"General")
-    r1 = ET.SubElement(g1, "Total de registros")
+    r1 = ET.SubElement(g1, "TotalDeRegistros")
     r1.text = Registros
-    p1 = ET.SubElement(g1, "Total de registros procesados")
+    p1 = ET.SubElement(g1, "TotalDeRegistrosProcesados")
     p1.text = Registrosprocesados
     e1 = ET.SubElement(g1, "Errores")
     e1.text = Errores
