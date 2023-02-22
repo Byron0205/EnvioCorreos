@@ -8,20 +8,17 @@ import xml.etree.ElementTree as ET
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 port = 5000 # Puerto de comunicacion
 sock.bind(('localhost',port)) # IP y Puerto de conexion en una Tupla
-sock.listen(4)
-ListaPersonas = []
-contador = 0
-contadorprocesados = 0
+sock.listen(3)
 Limite = 0
 
-def EscribirEmail(Lista):
+def EscribirEmail(email, mensaje, asunto):
     remitente = "pruebacorreosprogramacion1@gmail.com"
-    destinatario = Lista[4]
-    mensaje = "Esto es un mensaje desde python"
+    mensaje = mensaje
+    destinatario = email
     email = EmailMessage()
     email["From"] = remitente
-    email["To"] = destinatario
-    email["Subject"] = "Correo de prueba python"
+    email["To"] = email
+    email["Subject"] = asunto
     email.set_content(mensaje)
     smtp = smtplib.SMTP_SSL("smtp.gmail.com")
     smtp.login(remitente, "") #Falta clave
@@ -29,17 +26,31 @@ def EscribirEmail(Lista):
     smtp.quit()
 
 def RecibirDatos(con):
+    contadorprocesados = 0
+    contador = 1
+    asunto = ''
+    mensaje = ''
     while True:
         data = con.recv(4096)
         dt = data.decode()
-        ListaPersonas.append(dt)
-        contador += 1
-        if contador == 5: #Cada cinco datos es una persona
-            EscribirEmail(ListaPersonas)
-            contadorprocesados += 1
-            contador = 0
-            ListaPersonas = [] # Falta forma de saber cuando terminar el while
-    EscribirXML(registros,contadorprocesados,errores)
+        datosEnviados=dt.split(',')
+        while True:
+            if datosEnviados[0] == '1':
+                datosEnviados.remove('1')
+                for p in datosEnviados:
+                    EscribirEmail(p,mensaje,asunto)
+                    contador+=1
+                    contadorprocesados += 1
+            elif datosEnviados[0] == '2':
+                mensaje = datosEnviados[1]
+                asunto = datosEnviados[2]
+                datosEnviados.remove('2')
+                datosEnviados.remove(mensaje)
+                datosEnviados.remove(asunto)
+            elif datosEnviados[0] == '3':
+                break
+            #EscribirXML(registros,contadorprocesados,errores)
+        break
     con.close()
     sock.close()
 

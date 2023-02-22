@@ -4,38 +4,63 @@ from tkinter import filedialog
 from tkinter import messagebox as alert
 from ClasePersona import Persona
 import xml.etree.ElementTree as ET
+import socket
 
 class GUI(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Selección de archivos")
-        self.geometry('500x500')
+        self.title("Correo nuevo")
+        self.geometry('520x250')
+        self.clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.correo = ''
+        self.password = ''
         self.rutas =[None,None,None]
         self.clientes = []
         self.hilo1= threading.Thread(target=self.GuardarClientes, args=(self.rutas[0],))
         self.hilo2= threading.Thread(target=self.GuardarClientes, args=(self.rutas[1],))
         self.hilo3= threading.Thread(target=self.GuardarClientes, args=(self.rutas[2],))
-        self.ruta = tk.StringVar(value="Debe seleccionar entre 2 y 3 archivos")
-        self.boton_CargarClientes = tk.Button(self,text='GuardarClientes', command=self.CargarClientesXML)
+        self.ruta = tk.StringVar()
+        self.CorreoPara= tk.StringVar()
+        self.boton_CargarClientes = ''
+        #self.boton_Consultar = ''
 
         self.componentes()
 
 
     def componentes(self):
-        label_instruccion = tk.Label(self, text="Seleccionar 2 o 3 archivos:")
-        label_instruccion.pack()
+        correoPara = tk.Label(self, text="Para:")
+        correoPara_Entry = tk.Entry(self, width=50, textvariable=self.CorreoPara)
+        cargarDestinatarios= tk.Button(self, text= 'Cargar', width=6,command=self.ventanaCargarClientes)
+        asunto_label = tk.Label(self, text="Asunto:")
+        asunto_entry = tk.Entry(self, width=50)
+        mensaje_label = tk.Label(self, text="Mensaje:")
+        mensaje_text = tk.Text(self, width=50, height=10)
+        enviar_button = tk.Button(self, text="Enviar", command=lambda:self.enviarCorreo(mensaje=mensaje_text.get(1.0,tk.END),asunto= asunto_entry.get()))
 
-        boton_buscar = tk.Button(self, text="Buscar archivos", command=self.buscar_archivos)
-        boton_buscar.pack()
+        correoPara.grid(row=0, column=0, sticky=tk.E)
+        correoPara_Entry.grid(row=0, column=1)
+        cargarDestinatarios.grid(row=0,column=2)
+        asunto_label.grid(row=1, column=0, sticky=tk.E)
+        asunto_entry.grid(row=1, column=1)
+        mensaje_label.grid(row=2, column=0, sticky=tk.NE)
+        mensaje_text.grid(row=2, column=1, rowspan=3)
+        enviar_button.grid(row=5, column=1, sticky=tk.E)
 
-        label_archivos = tk.Label(self, textvariable=self.ruta)
-        label_archivos.pack()
-        boton_Consultar = tk.Button(self, text='Ver Clientes', command=self.ConsultarClientes)
-        boton_Consultar.pack()
-        self.boton_CargarClientes = tk.Button(self,text='GuardarClientes', command=self.CargarClientesXML)
-        self.boton_CargarClientes.pack()
-        if self.ruta.get() == "Debe seleccionar entre 2 y 3 archivos":
-            self.boton_CargarClientes.config(state='disabled')
+
+    def enviarCorreo(self, mensaje, asunto):
+        self.clientSocket.connect(('localhost', 5000))
+        datos = f'2,{mensaje},{asunto},'
+        enviado = datos.encode()
+        self.clientSocket.send(enviado)
+        self.clientSocket.send(b'1,')
+
+        for c in self.clientes:
+            datos = f'{c.email},'
+            enviado = datos.encode()
+            self.clientSocket.send(enviado)
+        datos = '3'
+        enviado = datos.encode()
+        self.clientSocket.send(enviado)
 
     def CargarClientesXML(self):
         if len(self.rutas)>=3:
@@ -45,11 +70,13 @@ class GUI(tk.Tk):
             self.hilo1.join()
             self.hilo2.join()
             self.hilo3.join()
+            #self.boton_Consultar.config(state='normal')
         elif len(self.rutas)>=2:
             self.hilo1.start()
             self.hilo2.start()
             self.hilo1.join()
             self.hilo2.join()
+            #self.boton_Consultar.config(state='normal')
 
     def GuardarClientes(self,ruta):
         tree = ET.parse(ruta)
@@ -60,14 +87,42 @@ class GUI(tk.Tk):
             datos.append(persone_id)
             for child in c:
                 datos.append(child.text)
-            cliente = Persona(id=datos[0],nombre=datos[1],apellido=datos[2],telefono=datos[3],email=datos[4])
+            cliente = Persona(id=datos[0],email=datos[4])
             self.clientes.append(cliente)
 
+    def cerrarVentana(self,ventana):
+        ventana.grab_release()
+        ventana.destroy()
+
+    def ventanaCargarClientes(self):
+        carga = tk.Toplevel(self)
+        carga.title("Cargar Clientes")
+        carga.geometry('500x250')
+        carga.grab_set()
+        label_instruccion = tk.Label(carga, text="Debe seleccionar minimo 2 archivos(3 max)", font='10')
+        label_instruccion.grid(row=1,column=0,columnspan=2)
+
+        boton_buscar = tk.Button(carga, text="Buscar archivos", command=self.buscar_archivos)
+        boton_buscar.grid(row=2,column=0)
+
+        label_archivos = tk.Label(carga, textvariable=self.ruta)
+        label_archivos.grid(row=3,column=0,columnspan=2)
+
+        #self.boton_Consultar =tk.Button(carga, text='Ver Clientes', command=self.ConsultarClientes)
+        #self.boton_Consultar.grid(row=4,column=1)
+        
+        self.boton_CargarClientes = tk.Button(carga,text='GuardarClientes', command=self.CargarClientesXML)
+        self.boton_CargarClientes.grid(row=4,column=0)
+        boton_Aceptar = tk.Button(carga, text='Aceptar', command=lambda:self.cerrarVentana(carga))
+        boton_Aceptar.grid(row=5,column=1)
+        if self.ruta.get() == "":
+            self.boton_CargarClientes.config(state='disabled')
+            self.boton_Consultar.config(state='disabled')
 
     def buscar_archivos(self):
         self.rutas.clear()
         self.rutas= list(filedialog.askopenfilenames(filetypes=[("Archivo XML", "*.xml")]))
-        self.ruta.set(value="Debe seleccionar entre 2 y 3 archivos")
+        self.ruta.set(value="")
         
         if len(self.rutas) >= 2 and len(self.rutas) <= 3:
             if len(self.rutas)>=3:
@@ -86,25 +141,57 @@ class GUI(tk.Tk):
         else:
             alert.showwarning(title='Error en la carga de archivos',text="Debe seleccionar entre 2 y 3 archivos")
     
-    #Funcion para revisar que existan y se creen los clientes
-    def ConsultarClientes(self):
-        formConsultar = tk.Toplevel(self)
-        formConsultar.title("Búsqueda")
+    def guardarCredenciales(self, user, password, ventana):
+        self.correo = user
+        self.password = password
+        ventana.withdraw
 
-        lblBuscar = tk.Label(formConsultar, text='Digite el nombre o apellido',justify='center')
-        lblBuscar.grid(column=1,row=0)
+
+    #Funcion para revisar que existan y se creen los clientes
+    #   formConsultar = tk.Toplevel(self)
+    #    formConsultar.title("Búsqueda")
+
+    #    lblBuscar = tk.Label(formConsultar, text='Digite el nombre o apellido',justify='center')
+    #    lblBuscar.grid(column=1,row=0)
 
 
         #lista de pacientes
-        pacientes = tk.Listbox(formConsultar,justify='center')
-        pacientes.grid(row=2,column=1)
+    #   pacientes = tk.Listbox(formConsultar,justify='center')
+    #    pacientes.grid(row=2,column=1)
+    #    if pacientes.size() ==0:
+    #        for p in self.clientes:
+    #            pacientes.insert('end',  p.id+" "+p.email)
+    #    else:
+    #        pacientes.delete(0, 'END')
 
-        for p in self.clientes:
-            pacientes.insert('end',  p.id+" "+p.nombre +" "+p.apellido)
-            
+    #    formConsultar.mainloop()
 
-        formConsultar.mainloop()
 
+    def IniciarSesion(self):
+        ventana = tk.Tk()
+        ventana.title("Inicio de sesión")
+        ventana.geometry("500x250")
+
+        titulo_label = tk.Label(ventana, text="Inicio de sesión", font=("Arial", 18), pady=20)
+        titulo_label.pack()
+
+        correo_label = tk.Label(ventana, text="Correo electrónico:", anchor="center")
+        correo_label.pack()
+        correo_entry = tk.Entry(ventana, width=50, justify="center")
+        correo_entry.pack()
+
+        contrasena_label = tk.Label(ventana, text="Contraseña generada:", anchor="center")
+        contrasena_label.pack()
+        contrasena_entry = tk.Entry(ventana, width=50, show="*", justify="center")
+        contrasena_entry.pack()
+
+        iniciar_sesion_button = tk.Button(ventana, text="Iniciar sesión",command=lambda:self.guardarCredenciales(correo_entry.get(),contrasena_entry.get(),ventana))
+        iniciar_sesion_button.pack(pady=20)
+
+        # centrar la ventana en la pantalla
+        ventana.eval('tk::PlaceWindow %s center' % ventana.winfo_toplevel())
+
+        ventana.mainloop()
 
 
 root = GUI()
