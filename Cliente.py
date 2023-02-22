@@ -59,6 +59,10 @@ class GUI(tk.Tk):
             enviado = datos.encode()
             self.clientSocket.send(enviado)
         self.clientSocket.send(b'3')
+        while True: #Esto recibe lo que envia el server, no se como mostrarlo o si deberia estar aqui xd
+            data = self.clientSocket.recv(4096)
+            dt = data.decode()
+            print(dt)
 
     def CargarClientesXML(self):
         if len(self.rutas)>=3:

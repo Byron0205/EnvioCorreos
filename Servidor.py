@@ -29,7 +29,7 @@ def EscribirEmail(email, mensaje, asunto):
     smtp.sendmail(remitente, destinatario, email.as_string())
     smtp.quit()
 
-def RecibirDatos(con):
+def RecibirDatos(con,direc):
     errores = ''
     contadorprocesados = 0
     asunto = ''
@@ -48,6 +48,8 @@ def RecibirDatos(con):
                         hilo1= threading.Thread(target=EscribirEmail, args=(p,mensaje,asunto,))
                         hilo1.start()
                         contadorprocesados += 1
+                        data = str(contadorprocesados).encode()
+                        con.send(data)
                     hilo1.join()
                 elif datosEnviados[0] == '2':
                     mensaje = datosEnviados[1]
@@ -86,7 +88,7 @@ def EscribirXML(Registros,Registrosprocesados,Errores):
 
 #Forma con una sola conexion
 con, client_addr =  sock.accept()
-RecibirDatos(con)
+RecibirDatos(con,client_addr)
 #Forma con varias conexiones
 #while True: 
     # creamos los hilos
