@@ -24,6 +24,7 @@ class GUI(tk.Tk):
         self.ruta = tk.StringVar()
         self.CorreoPara= tk.StringVar()
         self.boton_CargarClientes = ''
+        self.componentes()
         #self.boton_Consultar = ''
 
         

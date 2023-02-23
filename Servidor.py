@@ -1,3 +1,4 @@
+
 import socket
 from email.message import EmailMessage
 import smtplib
@@ -15,23 +16,27 @@ errores = []
 
 # PruebaLola1234
 
-def EscribirEmail(email, mensaje, asunto):
+def EscribirEmail(destinatario, mensaje, asunto):
     try:
-        remitente = "jbarquero201420@gmail.com"
-        mensaje = mensaje
-        destinatario = email
-        email = EmailMessage()
-        email["From"] = remitente
-        email["To"] = email
-        email["Subject"] = asunto
-        email.set_content(mensaje)
-        smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-        smtp.login(remitente, 'kghjhmsvsthnxems') #Falta clave
-        smtp.sendmail(remitente, destinatario, email.as_string())
-        smtp.quit()
-    except:
+        if (destinatario) == '' : 
+            print('Error')
+        else:
+            remitente = "a@gmail.com"
+            mensaje = mensaje
+            email = EmailMessage()
+            email["From"] = remitente
+            email["To"] = destinatario
+            email["Subject"] = asunto
+            email.set_content(mensaje)
+            smtp = smtplib.SMTP_SSL("smtp.gmail.com")
+            smtp.login(remitente, 'a') #Falta clave
+            smtp.sendmail(remitente, destinatario, email.as_string())
+            smtp.quit()
+    except Exception as e:
         Error = f'Error al enviar email al correo: {destinatario}\n'
         errores.append(Error)
+        print(f"Error al enviar email al correo {destinatario}: {str(e)}")
+
 
 def RecibirDatos(con):
     contadorprocesados = 0
@@ -103,6 +108,4 @@ RecibirDatos(con)
     #Limite += 1
     #if Limite == 3:
     #    break
-
-
             
