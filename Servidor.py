@@ -16,12 +16,12 @@ errores = []
 
 # PruebaLola1234
 
-def EscribirEmail(destinatario, mensaje, asunto):
+def EscribirEmail(destinatario, mensaje, asunto,correo, contrasena):
     try:
         if (destinatario) == '' : 
             print('Error')
         else:
-            remitente = "a@gmail.com"
+            remitente = correo
             mensaje = mensaje
             email = EmailMessage()
             email["From"] = remitente
@@ -29,7 +29,7 @@ def EscribirEmail(destinatario, mensaje, asunto):
             email["Subject"] = asunto
             email.set_content(mensaje)
             smtp = smtplib.SMTP_SSL("smtp.gmail.com")
-            smtp.login(remitente, 'a') #Falta clave
+            smtp.login(remitente, contrasena) #Falta clave
             smtp.sendmail(remitente, destinatario, email.as_string())
             smtp.quit()
     except Exception as e:
@@ -53,7 +53,7 @@ def RecibirDatos(con):
                     for p in datosEnviados:
                         if p == '3':
                             break
-                        hilo1= threading.Thread(target=EscribirEmail, args=(p,mensaje,asunto,))
+                        hilo1= threading.Thread(target=EscribirEmail, args=(p,mensaje,asunto,correo, password))
                         hilo1.start()
                         contadorprocesados += 1
                         data = str(contadorprocesados).encode()
@@ -62,11 +62,33 @@ def RecibirDatos(con):
                 elif datosEnviados[0] == '2':
                     mensaje = datosEnviados[1]
                     asunto = datosEnviados[2]
+                    correo = datosEnviados[3]
+                    password = datosEnviados[4]
                     datosEnviados.remove('2')
                     datosEnviados.remove(mensaje)
                     datosEnviados.remove(asunto)
+                    datosEnviados.remove(correo)
+                    datosEnviados.remove(password)
                 elif datosEnviados[-1] == '3':
                     break
+                elif datosEnviados[0] == '4':
+                    mensaje = datosEnviados[1]
+                    asunto = datosEnviados[2]
+                    correo = datosEnviados[3]
+                    password = datosEnviados[4]
+                    destinatario = datosEnviados[5]
+                    datosEnviados.remove('4')
+                    datosEnviados.remove(mensaje)
+                    datosEnviados.remove(asunto)
+                    datosEnviados.remove(correo)
+                    datosEnviados.remove(password)
+                    datosEnviados.remove(destinatario)
+                    
+                    hilo1= threading.Thread(target=EscribirEmail, args=(destinatario,mensaje,asunto,correo, password))
+                    hilo1.start()
+                    contadorprocesados += 1
+                    data = str(contadorprocesados).encode()
+                    con.send(data)
             break
         except:
             print('Error enviado los datos')

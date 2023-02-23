@@ -10,7 +10,7 @@ class GUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Correo nuevo")
-        self.geometry('520x250')
+        self.geometry('550x320')
         self.clientSocket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.correo = ''
         self.password = ''
@@ -24,6 +24,7 @@ class GUI(tk.Tk):
         self.ruta = tk.StringVar()
         self.CorreoPara= tk.StringVar()
         self.boton_CargarClientes = ''
+        self.correoPara_Entry=''
         self.componentes()
         #self.boton_Consultar = ''
 
@@ -31,23 +32,39 @@ class GUI(tk.Tk):
 
 
     def componentes(self):
+
+        correo_label = tk.Label(self, text="Correo:")
+        correo_entry = tk.Entry(self, width=50)
+        
+        contrasena_label = tk.Label(self, text="Contraseña:", anchor="center")
+        contrasena_entry = tk.Entry(self, width=50, show="*", justify="center")
+        
+
+        #iniciar_sesion_button = tk.Button(self, text="Iniciar sesión",command=lambda:self.guardarCredenciales(correo_entry.get(),contrasena_entry.get()))
+        
+
         correoPara = tk.Label(self, text="Para:")
-        correoPara_Entry = tk.Entry(self, width=50, textvariable=self.CorreoPara)
+        self.correoPara_Entry = tk.Entry(self, width=50, textvariable=self.CorreoPara)
         cargarDestinatarios= tk.Button(self, text= 'Cargar', width=6,command=self.ventanaCargarClientes)
         asunto_label = tk.Label(self, text="Asunto:")
         asunto_entry = tk.Entry(self, width=50)
         mensaje_label = tk.Label(self, text="Mensaje:")
         mensaje_text = tk.Text(self, width=50, height=10)
-        enviar_button = tk.Button(self, text="Enviar", command=lambda:self.enviarCorreo(mensaje=mensaje_text.get(1.0,tk.END),asunto= asunto_entry.get()))
-
-        correoPara.grid(row=0, column=0, sticky=tk.E)
-        correoPara_Entry.grid(row=0, column=1)
-        cargarDestinatarios.grid(row=0,column=2)
-        asunto_label.grid(row=1, column=0, sticky=tk.E)
-        asunto_entry.grid(row=1, column=1)
-        mensaje_label.grid(row=2, column=0, sticky=tk.NE)
-        mensaje_text.grid(row=2, column=1, rowspan=3)
-        enviar_button.grid(row=5, column=1, sticky=tk.E)
+        enviar_button = tk.Button(self, text="Enviar", command=lambda:self.enviarCorreo(mensaje=mensaje_text.get(1.0,tk.END),asunto= asunto_entry.get(),correo= correo_entry.get(),password= contrasena_entry.get()))
+        
+        correo_label.grid(row=0,column=0)
+        correo_entry.grid(row=0,column=1)
+        contrasena_label.grid(row=1,column=0)
+        contrasena_entry.grid(row=1,column=1)
+        #iniciar_sesion_button.grid(row=2,column=1,sticky=tk.E)
+        correoPara.grid(row=3, column=0, sticky=tk.E)
+        self.correoPara_Entry.grid(row=3, column=1)
+        cargarDestinatarios.grid(row=3,column=2)
+        asunto_label.grid(row=4, column=0, sticky=tk.E)
+        asunto_entry.grid(row=4, column=1)
+        mensaje_label.grid(row=5, column=0, sticky=tk.NE)
+        mensaje_text.grid(row=5, column=1, rowspan=3)
+        enviar_button.grid(row=9, column=1, sticky=tk.E)
 
     def VentanaProgreso(self):
         self.total.set(len(self.clientes))
@@ -68,17 +85,20 @@ class GUI(tk.Tk):
             #ventana.destroy()
         ventana.mainloop()
 
-    def enviarCorreo(self, mensaje, asunto):
+    def enviarCorreo(self, mensaje, asunto, correo, password):
         self.clientSocket.connect(('localhost', 5000))
-        datos = f'2,{mensaje},{asunto},'
-        enviado = datos.encode()
-        self.clientSocket.send(enviado)
-        self.clientSocket.send(b'1,')
-
-        for c in self.clientes:
-            datos = f'{c.email},'
+        if self.CorreoPara.get() != 'cargado desde xml':
+            datos = f'4,{mensaje},{asunto},{correo},{password},{self.CorreoPara.get()}'
+        else:
+            datos = f'2,{mensaje},{asunto},{correo},{password},'
             enviado = datos.encode()
             self.clientSocket.send(enviado)
+            self.clientSocket.send(b'1,')
+
+            for c in self.clientes:
+                datos = f'{c.email},'
+                enviado = datos.encode()
+                self.clientSocket.send(enviado)
         self.clientSocket.send(b'3')
         self.VentanaProgreso()
 
@@ -155,14 +175,15 @@ class GUI(tk.Tk):
                 
 
             self.boton_CargarClientes.config(state='normal')
+            self.CorreoPara.set('cargado desde xml')
+            self.correoPara_Entry.config( state='disabled')
             alert.showinfo(title='Transaccion exitosa', message='Clientes cargados correctamente')
         else:
             alert.showwarning(title='Error en la carga de archivos',text="Debe seleccionar entre 2 y 3 archivos")
     
-    def guardarCredenciales(self, user, password, ventana):
+    def guardarCredenciales(self, user, password):
         self.correo = user
         self.password = password
-        ventana.withdraw
 
     def IniciarSesion(self):
         ventana = tk.Toplevel(self)
